@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Building2, Gift, HeartHandshake, Leaf, Package, PartyPopper, ShieldCheck, Sparkles, Sun, Crown } from "lucide-react";
+import { ArrowRight, BadgeCheck, Building2, Gift, HeartHandshake, Leaf, Package, PartyPopper, ShieldCheck, Sparkles, Sun, Crown, Truck, Lock } from "lucide-react";
 import { db } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { cardSelect, getPublishedCategories } from "@/lib/services/catalog";
@@ -10,6 +10,7 @@ import { SectionHeading } from "@/components/store/section-heading";
 import { FaqList } from "@/components/store/faq-list";
 import { Stars } from "@/components/ui/stars";
 import { DemoBadge, Badge } from "@/components/ui/badge";
+import { formatINR } from "@/lib/money";
 
 const ICONS = { leaf: Leaf, check: BadgeCheck, box: Package, sun: Sun, heart: HeartHandshake, lock: ShieldCheck } as const;
 
@@ -31,7 +32,13 @@ export default async function HomePage() {
     }),
     db.banner.findMany({ where: { isActive: true, placement: "HOME_PROMO" }, orderBy: { sortOrder: "asc" }, take: 1 }),
   ]);
-  const { hero, home } = settings;
+  const { hero, home, commerce } = settings;
+  const trustPoints = [
+    { Icon: Leaf, title: "100% Natural", text: "No additives, no shortcuts" },
+    { Icon: Truck, title: "Fast Delivery", text: `Free shipping over ${formatINR(commerce.freeShippingThreshold)}` },
+    { Icon: Lock, title: "Secure Payments", text: "UPI, cards & COD" },
+    { Icon: BadgeCheck, title: "Quality Assured", text: "Hand-picked, freshness checked" },
+  ];
   const homeCats = HOME_CATEGORY_SLUGS.map((s) => categories.find((c) => c.slug === s && c.showOnHome)).filter(Boolean) as typeof categories;
   const extraCats = categories.filter((c) => c.showOnHome && !HOME_CATEGORY_SLUGS.includes(c.slug));
   const shownCats = [...homeCats, ...extraCats].slice(0, 10);
@@ -41,7 +48,9 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden bg-cream-100">
-        <div className="container-page grid items-center gap-10 py-12 md:py-16 lg:grid-cols-2 lg:py-24">
+        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-gold-300/25 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-forest-100/70 blur-3xl" aria-hidden />
+        <div className="container-page relative grid items-center gap-10 py-12 md:py-16 lg:grid-cols-2 lg:py-24">
           <div className="max-w-xl">
             {hero.eyebrow && <p className="eyebrow">{hero.eyebrow}</p>}
             <h1 className="mt-4 text-5xl leading-[1.05] sm:text-6xl lg:text-7xl">{hero.headline}</h1>
@@ -49,7 +58,7 @@ export default async function HomePage() {
             <p className="mt-6 text-lg leading-8 text-muted">{hero.description}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               {hero.primaryCta.label && (
-                <ButtonLink href={hero.primaryCta.href || "/shop"} size="lg">
+                <ButtonLink href={hero.primaryCta.href || "/shop"} size="lg" className="shadow-[0_12px_28px_-10px_rgb(31_61_43_/_0.45)]">
                   {hero.primaryCta.label}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </ButtonLink>
@@ -60,10 +69,36 @@ export default async function HomePage() {
                 </ButtonLink>
               )}
             </div>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
+              {trustPoints.slice(0, 3).map(({ Icon, title }) => (
+                <span key={title} className="inline-flex items-center gap-2 text-sm font-medium text-forest-800">
+                  <Icon className="h-4 w-4 text-gold-600" aria-hidden />
+                  {title}
+                </span>
+              ))}
+            </div>
           </div>
           <div className="relative mx-auto aspect-[10/9] w-full max-w-xl">
-            {hero.image && <SmartImage src={hero.image} alt={hero.imageAlt} fill priority sizes="(min-width:1024px) 45vw, 90vw" className="object-contain" />}
+            <div className="absolute inset-6 rounded-full bg-gradient-to-br from-cream-50 to-beige-200 shadow-[var(--shadow-soft)]" aria-hidden />
+            {hero.image && <SmartImage src={hero.image} alt={hero.imageAlt} fill priority sizes="(min-width:1024px) 45vw, 90vw" className="relative object-contain" />}
           </div>
+        </div>
+      </section>
+
+      {/* Trust strip */}
+      <section className="border-y border-beige-300/70 bg-cream-50">
+        <div className="container-page grid grid-cols-2 gap-6 py-8 sm:grid-cols-4">
+          {trustPoints.map(({ Icon, title, text }) => (
+            <div key={title} className="flex items-start gap-3">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-forest-50 text-forest-800 ring-1 ring-gold-400/50">
+                <Icon className="h-5 w-5" aria-hidden />
+              </span>
+              <div>
+                <p className="font-serif text-base font-semibold text-forest-900">{title}</p>
+                <p className="text-xs text-muted">{text}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
