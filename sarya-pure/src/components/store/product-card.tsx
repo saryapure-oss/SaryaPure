@@ -11,7 +11,7 @@ export function ProductCard({ product, priority = false }: { product: ProductCar
   const img = product.images[0];
   const available = v?.inventory ? v.inventory.stock - v.inventory.reserved : 0;
   return (
-    <article className="group card relative flex h-full flex-col overflow-hidden transition hover:-translate-y-0.5 hover:shadow-lg">
+    <article className="group card relative flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_-16px_rgb(31_61_43_/_0.28)]">
       <Link href={`/products/${product.slug}`} className="relative block aspect-square overflow-hidden bg-cream-200" tabIndex={-1} aria-hidden>
         {img ? (
           <SmartImage
@@ -19,10 +19,11 @@ export function ProductCard({ product, priority = false }: { product: ProductCar
             alt=""
             fill
             sizes="(min-width:1280px) 22vw, (min-width:768px) 30vw, 50vw"
-            className="object-cover transition duration-500 group-hover:scale-[1.03]"
+            className="object-cover transition duration-500 group-hover:scale-[1.06]"
             priority={priority}
           />
         ) : null}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-950/10 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" aria-hidden />
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1">
           {product.maxDiscountPct > 0 && <Badge tone="gold">Up to {product.maxDiscountPct}% off</Badge>}
           {product.isBestSeller && <Badge tone="green">Best seller</Badge>}
